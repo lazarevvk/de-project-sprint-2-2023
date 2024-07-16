@@ -1,14 +1,12 @@
 --------------------------------------------------------------------------------------------------------
 --TASK1--
 
--- Создаем таблицу справочника стоимости доставки
 CREATE TABLE shipping_country_rates (
-    id SERIAL PRIMARY KEY, -- Уникальный серийный идентификатор
-    shipping_country VARCHAR(255) UNIQUE, -- Cтраны
-    shipping_country_base_rate DECIMAL(10, 2) -- Базовый рейт доставки
+    id SERIAL PRIMARY KEY, 
+    shipping_country VARCHAR(255) UNIQUE, 
+    shipping_country_base_rate DECIMAL(10, 2)
 );
 
--- Заполняем таблицу справочника данными из таблицы shipping_country
 INSERT INTO shipping_country_rates (shipping_country, shipping_country_base_rate)
 SELECT distinct shipping_country, shipping_country_base_rate
 FROM shipping;
@@ -19,13 +17,12 @@ select * from shipping_country_rates
 --------------------------------------------------------------------------------------------------------
 --TASK2--
 
--- Создаем таблицу справочника тарифов доставки вендора
 drop table if exists shipping_agreement;
 CREATE TABLE shipping_agreement (
-    agreement_id SERIAL PRIMARY KEY, -- Уникальный идентификатор договора (первичный ключ)
-    agreement_number VARCHAR(255), -- Номер договора
-    agreement_rate DECIMAL(10, 2), -- Тариф договора
-    agreement_commission DECIMAL(5, 2) -- Комиссия договора
+    agreement_id SERIAL PRIMARY KEY, 
+    agreement_number VARCHAR(255),
+    agreement_rate DECIMAL(10, 2), 
+    agreement_commission DECIMAL(5, 2) 
 );
 
 
@@ -43,15 +40,13 @@ FROM (
 --------------------------------------------------------------------------------------------------------
 --TASK3--
 
--- Создаем таблицу справочника о типах доставки
 CREATE TABLE shipping_transfer (
-    id SERIAL PRIMARY KEY, -- Уникальный идентификатор (первичный ключ)
-    transfer_type VARCHAR(255), -- Тип доставки
-    transfer_model VARCHAR(255), -- Модель доставки
-    shipping_transfer_rate NUMERIC(14, 4) -- Ставка доставки
+    id SERIAL PRIMARY KEY, 
+    transfer_type VARCHAR(255),
+    transfer_model VARCHAR(255), 
+    shipping_transfer_rate NUMERIC(14, 4) 
 );
 
--- Вставляем данные из строки shipping_transfer_description в таблицу shipping_transfer
 INSERT INTO shipping_transfer (transfer_type, transfer_model, shipping_transfer_rate)
 SELECT DISTINCT
     CAST(subarr[1] AS VARCHAR(255)) AS transfer_type,
@@ -65,19 +60,16 @@ FROM (
 --------------------------------------------------------------------------------------------------------
 --TASK4--
 
-
--- Создаем таблицу shipping_info
 CREATE TABLE shipping_info (
-    shipping_id SERIAL PRIMARY KEY, -- Уникальный идентификатор доставки (первичный ключ)
-    vendor_id INT, -- Идентификатор вендора
-    payment_amount DECIMAL(14, 2), -- Сумма платежа
-    shipping_plan_datetime TIMESTAMP, -- Планируемая дата доставки
+    shipping_id SERIAL PRIMARY KEY,
+    vendor_id INT, 
+    payment_amount DECIMAL(14, 2),
+    shipping_plan_datetime TIMESTAMP, 
     shipping_transfer_id BIGINT,
     shipping_agreement_id BIGINT,
     shipping_country_rate_id BIGINT
 );
 
--- Добавляем внешние ключи для связи с справочниками
 ALTER TABLE shipping_info
 ADD CONSTRAINT fk_shipping_country_rate_id FOREIGN KEY (shipping_country_rate_id) REFERENCES shipping_country_rates(id);
 
@@ -87,7 +79,7 @@ ADD CONSTRAINT fk_shipping_agreement_id FOREIGN KEY (shipping_agreement_id) REFE
 ALTER TABLE shipping_info
 ADD CONSTRAINT fk_shipping_transfer_id FOREIGN KEY (shipping_transfer_id) REFERENCES shipping_transfer(id);
 
--- Вставляем данные в таблицу shipping_info из таблицы shipping и добавляем константную информацию
+
 INSERT INTO shipping_info (
     vendor_id, payment_amount, shipping_plan_datetime, shipping_transfer_id,  shipping_country_rate_id, shipping_agreement_id
 )
@@ -102,8 +94,7 @@ join
 join 
 	shipping_transfer st on sp.shipping_transfer_rate = st.shipping_transfer_rate 
 
-	
--- Проверка повторяющихся строк	
+
 SELECT COUNT(*) AS count_of_duplicate_rows
 FROM (
     SELECT COUNT(*) 
@@ -115,14 +106,13 @@ FROM (
 --------------------------------------------------------------------------------------------------------
 --TASK5--
 
-
 drop table shipping_status;
 CREATE TABLE shipping_status (
-    shipping_id BIGINT PRIMARY KEY, -- Уникальный идентификатор доставки (первичный ключ)
-    status VARCHAR(255), -- Статус доставки
-    state VARCHAR(255), -- Состояние доставки
-    shipping_start_fact_datetime TIMESTAMP, -- Фактическое время начала доставки
-    shipping_end_fact_datetime TIMESTAMP -- Фактическое время окончания доставки
+    shipping_id BIGINT PRIMARY KEY, 
+    status VARCHAR(255), 
+    state VARCHAR(255), 
+    shipping_start_fact_datetime TIMESTAMP, 
+    shipping_end_fact_datetime TIMESTAMP 
 );
 
 WITH Recieved AS (
